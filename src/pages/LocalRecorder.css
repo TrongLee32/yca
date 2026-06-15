@@ -20,6 +20,29 @@
   font-size: 0.9rem;
 }
 
+.local-recorder-page .page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.local-recorder-page .socket-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.local-recorder-page .socket-status.connected {
+  color: #155724;
+  background: #d4edda;
+}
+
+.local-recorder-page .socket-status.disconnected {
+  color: #721c24;
+  background: #f8d7da;
+}
+
 .local-recorder-page .recorder-card {
   background: #ffffff;
   border: 1px solid #e0e0e0;

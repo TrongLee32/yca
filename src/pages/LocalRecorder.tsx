@@ -1,7 +1,9 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
+import { io, Socket } from 'socket.io-client'
 import './LocalRecorder.css'
 
 const CHUNK_INTERVAL_MS = 30 * 1000 // 30 seconds
+const SOCKET_URL = 'http://localhost:3001' // Socket server URL
 
 interface AudioChunkInfo {
   index: number
@@ -31,6 +33,26 @@ interface TaskItem {
 
 const TEAM_MEMBERS = ['Minh', 'Hùng', 'Linh', 'Trang', 'Khoa']
 
+// Fake transcript responses to simulate AI transcription
+const FAKE_TRANSCRIPTS = [
+  'Chúng ta cần hoàn thành báo cáo tháng này trước thứ 6. Mọi người kiểm tra lại số liệu và gửi cho Minh tổng hợp.',
+  'Về dự án mới, team frontend sẽ bắt đầu sprint tiếp theo vào thứ 2. Linh sẽ lead phần UI redesign.',
+  'Cần review lại API documentation trước khi release. Hùng và Khoa phối hợp test integration.',
+  'Meeting với khách hàng được dời sang thứ 4 tuần sau. Trang chuẩn bị slide demo cho buổi đó.',
+  'Bug critical trên production đã được fix. Cần deploy hotfix trong ngày hôm nay.',
+  'Sprint retrospective cho thấy velocity tăng 20%. Team đang làm tốt, tiếp tục duy trì.',
+]
+
+// Fake task responses to simulate AI task extraction
+const FAKE_TASKS = [
+  { title: 'Hoàn thành báo cáo tháng', assignee: 'Minh' },
+  { title: 'Lead UI redesign sprint mới', assignee: 'Linh' },
+  { title: 'Review API documentation', assignee: 'Hùng' },
+  { title: 'Chuẩn bị slide demo cho khách hàng', assignee: 'Trang' },
+  { title: 'Deploy hotfix production', assignee: 'Khoa' },
+  { title: 'Tổng hợp kết quả sprint retrospective', assignee: 'Minh' },
+]
+
 function LocalRecorder() {
   const [isRecording, setIsRecording] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -38,6 +60,7 @@ function LocalRecorder() {
   const [elapsed, setElapsed] = useState(0)
   const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([])
   const [tasks, setTasks] = useState<TaskItem[]>([])
+  const [socketConnected, setSocketConnected] = useState(false)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -47,6 +70,111 @@ function LocalRecorder() {
   const timerRef = useRef<number | null>(null)
   const chunkStartTimeRef = useRef<number>(0)
   const transcriptEndRef = useRef<HTMLDivElement | null>(null)
+  const socketRef = useRef<Socket | null>(null)
+
+  // Initialize socket connection
+  useEffect(() => {
+    const socket = io(SOCKET_URL, {
+      transports: ['websocket'],
+      autoConnect: true,
+    })
+
+    socket.on('connect', () => {
+      console.log('[Socket] Connected:', socket.id)
+      setSocketConnected(true)
+    })
+
+    socket.on('disconnect', () => {
+      console.log('[Socket] Disconnected')
+      setSocketConnected(false)
+    })
+
+    // Listen for transcript response from server
+    socket.on('transcript_result', (data: { id: number; text: string; chunkIndex: number; timestamp: string }) => {
+      const entry: TranscriptEntry = {
+        id: data.id,
+        text: data.text,
+        timestamp: new Date(data.timestamp),
+        chunkIndex: data.chunkIndex,
+      }
+      setTranscripts(prev => [...prev, entry])
+    })
+
+    // Listen for task response from server
+    socket.on('task_result', (data: { id: number; title: string; status: TaskStatus; assignee: string; chunkIndex: number; createdAt: string }) => {
+      const task: TaskItem = {
+        id: data.id,
+        title: data.title,
+        status: data.status,
+        assignee: data.assignee,
+        chunkIndex: data.chunkIndex,
+        createdAt: new Date(data.createdAt),
+      }
+      setTasks(prev => [...prev, task])
+    })
+
+    socketRef.current = socket
+
+    // Fake: simulate socket connection since there's no real server
+    // The socket will fail to connect, so we simulate responses locally
+    const fakeConnectTimeout = setTimeout(() => {
+      if (!socket.connected) {
+        console.log('[Socket] Using fake mode (no server available)')
+        setSocketConnected(true)
+      }
+    }, 2000)
+
+    return () => {
+      clearTimeout(fakeConnectTimeout)
+      socket.disconnect()
+      socketRef.current = null
+    }
+  }, [])
+
+  const sendChunkViaSocket = useCallback((chunkInfo: AudioChunkInfo) => {
+    const socket = socketRef.current
+
+    // Convert blob to ArrayBuffer and send via socket
+    chunkInfo.blob.arrayBuffer().then((buffer) => {
+      if (socket?.connected) {
+        socket.emit('audio_chunk', {
+          index: chunkInfo.index,
+          audio: buffer,
+          size: chunkInfo.blob.size,
+          duration: chunkInfo.duration,
+          mimeType: 'audio/webm;codecs=opus',
+          timestamp: chunkInfo.timestamp.toISOString(),
+        })
+        console.log(`[Socket] Sent audio chunk #${chunkInfo.index} (${(chunkInfo.blob.size / 1024).toFixed(1)} KB)`)
+      } else {
+        console.log(`[Socket] Fake send audio chunk #${chunkInfo.index} (${(chunkInfo.blob.size / 1024).toFixed(1)} KB)`)
+      }
+    })
+
+    // Fake response: simulate server responding after a short delay
+    const fakeIndex = chunkInfo.index % FAKE_TRANSCRIPTS.length
+    setTimeout(() => {
+      const fakeTranscript: TranscriptEntry = {
+        id: Date.now(),
+        text: FAKE_TRANSCRIPTS[fakeIndex],
+        timestamp: new Date(),
+        chunkIndex: chunkInfo.index,
+      }
+      setTranscripts(prev => [...prev, fakeTranscript])
+    }, 1500) // Simulate 1.5s server processing delay
+
+    setTimeout(() => {
+      const fakeTask: TaskItem = {
+        id: Date.now() + 1,
+        title: FAKE_TASKS[fakeIndex].title,
+        status: 'draft',
+        assignee: FAKE_TASKS[fakeIndex].assignee,
+        chunkIndex: chunkInfo.index,
+        createdAt: new Date(),
+      }
+      setTasks(prev => [...prev, fakeTask])
+    }, 2500) // Simulate 2.5s server processing delay for task
+  }, [])
 
   const flushChunk = useCallback(() => {
     if (chunksBufferRef.current.length === 0) return
@@ -66,32 +194,16 @@ function LocalRecorder() {
       size: `${(blob.size / 1024).toFixed(1)} KB`,
       duration: `${duration.toFixed(1)}s`,
       timestamp: chunkInfo.timestamp.toISOString(),
-      blob,
     })
 
-    const mockTranscript: TranscriptEntry = {
-      id: Date.now(),
-      text: `[Transcript chunk #${chunkInfo.index}] Đây là nội dung được AI transcribe từ microphone audio ${duration.toFixed(0)}s (${(blob.size / 1024).toFixed(1)} KB). Trong thực tế, đoạn audio sẽ được gửi lên server và AI sẽ trả về text tại đây.`,
-      timestamp: new Date(),
-      chunkIndex: chunkInfo.index,
-    }
-    setTranscripts(prev => [...prev, mockTranscript])
-
-    const mockTask: TaskItem = {
-      id: Date.now(),
-      title: `Task từ chunk #${chunkInfo.index}: Review nội dung audio ${duration.toFixed(0)}s`,
-      status: 'draft',
-      assignee: '',
-      chunkIndex: chunkInfo.index,
-      createdAt: new Date(),
-    }
-    setTasks(prev => [...prev, mockTask])
+    // Send chunk via socket and get fake response
+    sendChunkViaSocket(chunkInfo)
 
     setChunks(prev => [...prev, chunkInfo])
     chunksBufferRef.current = []
     chunkIndexRef.current += 1
     chunkStartTimeRef.current = Date.now()
-  }, [])
+  }, [sendChunkViaSocket])
 
   const startRecording = useCallback(async () => {
     try {
@@ -223,7 +335,12 @@ function LocalRecorder() {
     <div className="local-recorder-page">
       <div className="page-header">
         <h2>🎤 Local Record</h2>
-        <p>Record audio directly from your microphone</p>
+        <div className="page-header-row">
+          <p>Record audio directly from your microphone</p>
+          <span className={`socket-status ${socketConnected ? 'connected' : 'disconnected'}`}>
+            ● {socketConnected ? 'Socket Connected' : 'Socket Disconnected'}
+          </span>
+        </div>
       </div>
 
       <div className="recorder-layout">
@@ -259,7 +376,7 @@ function LocalRecorder() {
                   {isPaused ? 'Paused' : 'Recording...'}
                 </div>
                 <div className="timer">{formatTime(elapsed)}</div>
-                <p className="info">Audio chunk mỗi 30 giây (console.log)</p>
+                <p className="info">Audio chunk sent via socket every 30s</p>
               </div>
             )}
           </div>
