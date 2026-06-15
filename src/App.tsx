@@ -2,9 +2,10 @@ import { useState } from 'react'
 import Layout from './components/Layout'
 import MeetingRecorder from './pages/MeetingRecorder'
 import MeetingList from './pages/MeetingList'
+import LocalRecorder from './pages/LocalRecorder'
 import './App.css'
 
-export type PageKey = 'recorder' | 'meetings'
+export type PageKey = 'recorder' | 'meetings' | 'local-recorder'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageKey>('recorder')
@@ -15,6 +16,8 @@ function App() {
         return <MeetingRecorder />
       case 'meetings':
         return <MeetingList />
+      case 'local-recorder':
+        return <LocalRecorder />
       default:
         return <MeetingRecorder />
     }

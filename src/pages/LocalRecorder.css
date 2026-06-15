@@ -1,0 +1,362 @@
+.local-recorder-page {
+  max-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.local-recorder-page .page-header {
+  margin-bottom: 1.5rem;
+}
+
+.local-recorder-page .page-header h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+  color: #1a1a2e;
+}
+
+.local-recorder-page .page-header p {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.local-recorder-page .recorder-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.local-recorder-page .controls {
+  margin: 1rem 0;
+}
+
+.local-recorder-page .btn {
+  padding: 0.85rem 1.8rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform 0.1s,
+    box-shadow 0.2s;
+}
+
+.local-recorder-page .btn:hover {
+  transform: scale(1.02);
+}
+
+.local-recorder-page .btn:active {
+  transform: scale(0.98);
+}
+
+.local-recorder-page .btn-start {
+  background: #2d6a4f;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(45, 106, 79, 0.3);
+}
+
+.local-recorder-page .btn-pause {
+  background: #f39c12;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(243, 156, 18, 0.3);
+}
+
+.local-recorder-page .btn-resume {
+  background: #2d6a4f;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(45, 106, 79, 0.3);
+}
+
+.local-recorder-page .btn-stop {
+  background: #ff4757;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255, 71, 87, 0.3);
+}
+
+.local-recorder-page .controls-group {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.local-recorder-page .status {
+  margin-top: 1.5rem;
+}
+
+.local-recorder-page .recording-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: #ff4757;
+}
+
+.local-recorder-page .recording-indicator.paused {
+  color: #f39c12;
+}
+
+.local-recorder-page .recording-indicator.paused .dot {
+  background: #f39c12;
+  animation: none;
+}
+
+.local-recorder-page .dot {
+  width: 10px;
+  height: 10px;
+  background: #ff4757;
+  border-radius: 50%;
+  animation: local-pulse 1s ease-in-out infinite;
+}
+
+@keyframes local-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.local-recorder-page .timer {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0.75rem 0;
+  font-variant-numeric: tabular-nums;
+  color: #1a1a2e;
+}
+
+.local-recorder-page .info {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.local-recorder-page .recorder-layout {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.local-recorder-page .recorder-left {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.local-recorder-page .chunks-list {
+  margin-top: 2rem;
+}
+
+.local-recorder-page .chunks-list h3 {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.local-recorder-page .chunk-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.local-recorder-page .chunk-info {
+  display: flex;
+  justify-content: space-between;
+}
+
+.local-recorder-page .chunk-item span {
+  color: #555;
+}
+
+.local-recorder-page .chunk-item audio {
+  width: 100%;
+  height: 32px;
+}
+
+.local-recorder-page .tasks-section {
+  margin-top: 2rem;
+}
+
+.local-recorder-page .tasks-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.local-recorder-page .task-item {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #ccc;
+}
+
+.local-recorder-page .task-item.task-draft {
+  border-left-color: #f39c12;
+}
+
+.local-recorder-page .task-item.task-approved {
+  border-left-color: #27ae60;
+}
+
+.local-recorder-page .task-item.task-rejected {
+  border-left-color: #ff4757;
+}
+
+.local-recorder-page .task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.local-recorder-page .task-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.local-recorder-page .task-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.local-recorder-page .badge-draft {
+  background: #fef3cd;
+  color: #856404;
+}
+
+.local-recorder-page .badge-approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.local-recorder-page .badge-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.local-recorder-page .task-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #777;
+  margin-bottom: 0.5rem;
+}
+
+.local-recorder-page .task-assignee {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.local-recorder-page .task-assignee label {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.local-recorder-page .task-assignee select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.local-recorder-page .task-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.local-recorder-page .task-btn {
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.local-recorder-page .task-btn-approve {
+  background: #d4edda;
+  color: #155724;
+}
+
+.local-recorder-page .task-btn-reject {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.local-recorder-page .task-btn-draft {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.local-recorder-page .transcript-panel {
+  width: 350px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.local-recorder-page .transcript-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.local-recorder-page .transcript-header h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.local-recorder-page .transcript-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.local-recorder-page .transcript-empty {
+  text-align: center;
+  color: #999;
+  padding: 2rem 1rem;
+}
+
+.local-recorder-page .transcript-entry {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.local-recorder-page .transcript-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 0.3rem;
+}
+
+.local-recorder-page .transcript-text {
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.5;
+}

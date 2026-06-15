@@ -16,6 +16,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { key: 'recorder', label: 'Recording', icon: '🎙️' },
+  { key: 'local-recorder', label: 'Local Record', icon: '🎤' },
   { key: 'meetings', label: 'Meetings', icon: '📋' },
 ]
 
